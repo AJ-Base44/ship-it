@@ -1,0 +1,38 @@
+{
+  "name": "ship-it",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "break_infinity.js": "^2.2.0",
+    "expo": "~56.0.12",
+    "expo-haptics": "~56.0.3",
+    "expo-status-bar": "~56.0.4",
+    "react": "19.2.3",
+    "react-native": "0.85.3",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/react": "~19.2.2",
+    "jest": "^29.7.0",
+    "jest-expo": "^56.0.5",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "testMatch": [
+      "**/__tests__/**/*.test.{ts,tsx}"
+    ]
+  },
+  "private": true
+}
