@@ -2,21 +2,16 @@
  * Chunky pill button.
  *
  * COLOURBLIND RULE: affordability/active state is carried by SHAPE, not hue:
- *  - filled  = solid ink fill, raised on a hard offset shadow  (actionable)
- *  - ghost   = transparent, thick ink outline, flat (no shadow) (not actionable)
+ *  - filled = solid ink fill, raised on a hard offset shadow   (actionable)
+ *  - ghost  = transparent, thick ink outline, flat (no shadow) (not actionable)
  * Callers reinforce ghost state with an `icon` (e.g. a lock) and always-visible
- * label/sublabel text, so meaning survives in pure greyscale.
+ * label/sublabel text, so meaning survives in pure greyscale. Press feedback is
+ * a squash-and-bounce (PressableScale).
  */
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
-import { palette, radius, outline, spacing, type as typeTokens } from '../theme/theme';
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { palette, radius, outline, spacing, size, type as typeTokens } from '../theme/theme';
 import { Shadowed } from './Shadowed';
+import { PressableScale } from './PressableScale';
 
 export type ButtonVariant = 'filled' | 'ghost';
 
@@ -42,34 +37,35 @@ export function Button({
 }: Props) {
   const filled = variant === 'filled' && !disabled;
   const textColor = filled ? palette.paper : palette.ink;
+  const a11y = sublabel ? `${label}, ${sublabel}` : label;
 
   const inner = (
-    <Pressable
-      onPress={disabled ? undefined : onPress}
-      disabled={disabled}
-      style={({ pressed }) => [
-        styles.base,
-        filled ? styles.filled : styles.ghost,
-        pressed && !disabled && styles.pressed,
-      ]}
-    >
+    <View style={[styles.base, filled ? styles.filled : styles.ghost]}>
       {icon ? <Text style={[styles.icon, { color: textColor }]}>{icon}</Text> : null}
       <View style={styles.labels}>
-        <Text style={[typeTokens.title, { color: textColor }]}>{label}</Text>
+        <Text style={[typeTokens.title, { color: textColor }]} numberOfLines={1}>
+          {label}
+        </Text>
         {sublabel ? (
-          <Text style={[styles.sublabel, { color: textColor }]}>{sublabel}</Text>
+          <Text style={[typeTokens.buttonSm, { color: textColor }]} numberOfLines={1}>
+            {sublabel}
+          </Text>
         ) : null}
       </View>
-    </Pressable>
+    </View>
   );
 
   // Only the raised (filled) state gets the hard shadow.
   return filled ? (
     <Shadowed radius={radius.pill} style={style}>
-      {inner}
+      <PressableScale onPress={onPress} disabled={disabled} accessibilityLabel={a11y}>
+        {inner}
+      </PressableScale>
     </Shadowed>
   ) : (
-    <View style={style}>{inner}</View>
+    <PressableScale onPress={onPress} disabled={disabled} style={style} accessibilityLabel={a11y}>
+      {inner}
+    </PressableScale>
   );
 }
 
@@ -84,27 +80,19 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: outline.thick,
     borderColor: palette.ink,
-    minWidth: 96,
+    minWidth: size.buttonMinWidth,
   },
   filled: {
     backgroundColor: palette.ink,
   },
   ghost: {
     backgroundColor: 'transparent',
-    opacity: 0.75,
-  },
-  pressed: {
-    opacity: 0.85,
-    transform: [{ translateY: 1 }],
+    opacity: 0.7,
   },
   labels: {
     alignItems: 'center',
   },
   icon: {
-    fontSize: 14,
-  },
-  sublabel: {
-    fontSize: 12,
-    fontWeight: '700',
+    ...typeTokens.body,
   },
 });

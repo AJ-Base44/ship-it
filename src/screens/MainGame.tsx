@@ -1,17 +1,28 @@
 /**
- * The Phase 0 prototype screen: currency readout, tap target, and the buyable
- * generator roster. Pulls live values from a single useUiSnapshot() so numbers
- * refresh on the slow UI cadence (not every logic tick).
+ * Main HUD. Reference structure:
+ *   top    — currency bar (Code balance + Code/sec)
+ *   center — hero tap zone
+ *   middle — scrollable styled generator buy-list
+ *   bottom — action bar (Boost / Shop / Settings placeholders)
+ * Plus the offline "welcome back" modal overlay.
+ *
+ * Live values come from a single useUiSnapshot() so numbers refresh on the slow
+ * UI cadence, not every 250ms logic tick.
  */
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Decimal from 'break_infinity.js';
 import { useGameStore } from '../state/store';
 import { useUiSnapshot } from '../state/useUiSnapshot';
 import { GENERATORS } from '../economy/generators';
 import { palette, spacing, type as typeTokens } from '../theme/theme';
 import { CurrencyBar } from '../components/CurrencyBar';
-import { TapButton } from '../components/TapButton';
+import { HeroTap } from '../components/HeroTap';
 import { GeneratorCard } from '../components/GeneratorCard';
-import { OfflineBanner } from '../components/OfflineBanner';
+import { BottomBar } from '../components/BottomBar';
+import { OfflineModal } from '../components/OfflineModal';
+import { PressableScale } from '../components/PressableScale';
+
+const ZERO = new Decimal(0);
 
 export function MainGame() {
   const snap = useUiSnapshot();
@@ -26,7 +37,7 @@ export function MainGame() {
   return (
     <View style={styles.container}>
       <CurrencyBar code={snap.code} productionPerSec={snap.productionPerSec} />
-      <TapButton tapValue={snap.tapValue} onTap={onTap} />
+      <HeroTap tapValue={snap.tapValue} onTap={onTap} />
 
       <Text style={[typeTokens.label, styles.sectionHeader]}>YOUR TEAM</Text>
 
@@ -35,24 +46,29 @@ export function MainGame() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       >
-        {showOffline ? (
-          <OfflineBanner amount={snap.lastOfflineEarned!} onDismiss={onDismissOffline} />
-        ) : null}
-
-        {GENERATORS.map((def) => (
+        {GENERATORS.map((def, i) => (
           <GeneratorCard
             key={def.id}
             def={def}
+            index={i}
             owned={snap.owned[def.id] ?? 0}
             code={snap.code}
             onBuy={onBuy}
           />
         ))}
 
-        <Pressable onPress={onReset} style={styles.reset} hitSlop={8}>
+        <PressableScale onPress={onReset} style={styles.reset}>
           <Text style={styles.resetText}>Reset progress (dev)</Text>
-        </Pressable>
+        </PressableScale>
       </ScrollView>
+
+      <BottomBar />
+
+      <OfflineModal
+        visible={showOffline}
+        amount={snap.lastOfflineEarned ?? ZERO}
+        onCollect={onDismissOffline}
+      />
     </View>
   );
 }
@@ -64,18 +80,19 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   sectionHeader: {
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
+    marginLeft: spacing.xs,
   },
   list: {
     flex: 1,
   },
   listContent: {
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xxl,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.lg,
   },
   reset: {
     alignSelf: 'center',
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     paddingVertical: spacing.sm,
   },
   resetText: {

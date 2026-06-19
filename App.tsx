@@ -1,11 +1,13 @@
 /**
- * Ship It! — Phase 0 prototype root.
+ * Ship It! root.
  *
- * Boots the game loop (load → offline catch-up → tick/save), then renders the
- * main screen on the cream-paper background. Full safe-area handling and the
- * juiced visual system come in later phases.
+ * Loads the display + body fonts (expo-font), boots the game loop, and renders
+ * the HUD on the cream-paper background once both are ready. Skia, animated
+ * backgrounds, and particles are deferred to a later phase — Reanimated + Moti
+ * only, so this runs in Expo Go.
  */
 import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
 import {
   Platform,
   StatusBar as RNStatusBar,
@@ -15,7 +17,8 @@ import {
 } from 'react-native';
 import { useGameLoop } from './src/state/useGameLoop';
 import { MainGame } from './src/screens/MainGame';
-import { palette, spacing, type as typeTokens } from './src/theme/theme';
+import { fontMap } from './src/theme/fontMap';
+import { palette, spacing } from './src/theme/theme';
 
 const TOP_PAD =
   Platform.select({
@@ -25,16 +28,19 @@ const TOP_PAD =
   }) ?? 24;
 
 export default function App() {
+  const [fontsLoaded] = useFonts(fontMap);
   const { ready } = useGameLoop();
+  const appReady = ready && fontsLoaded;
 
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
-      {ready ? (
+      {appReady ? (
         <MainGame />
       ) : (
         <View style={styles.loading}>
-          <Text style={typeTokens.title}>Booting studio…</Text>
+          {/* System font here — custom faces may not be loaded yet. */}
+          <Text style={styles.loadingText}>Booting studio…</Text>
         </View>
       )}
     </View>
@@ -52,5 +58,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: palette.ink,
   },
 });

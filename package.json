@@ -3,18 +3,24 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@expo-google-fonts/baloo-2": "^0.4.2",
+    "@expo-google-fonts/nunito": "^0.4.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "break_infinity.js": "^2.2.0",
     "expo": "~56.0.12",
+    "expo-font": "~56.0.7",
     "expo-haptics": "~56.0.3",
     "expo-status-bar": "~56.0.4",
+    "moti": "^0.30.0",
     "react": "19.2.3",
     "react-native": "0.85.3",
+    "react-native-reanimated": "4.3.1",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",
+    "babel-preset-expo": "^56.0.15",
     "jest": "^29.7.0",
     "jest-expo": "^56.0.5",
     "typescript": "~6.0.3"
